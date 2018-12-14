@@ -1,10 +1,12 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import { OTPublisher } from '../../src'
-import RadioButtons from './RadioButtons';
-import CheckBox from './CheckBox';
+import { OTPublisher } from "../../src";
+import RadioButtons from "./RadioButtons";
+import CheckBox from "./CheckBox";
 
 export default class Publisher extends Component {
+  publisher;
+
   constructor(props) {
     super(props);
 
@@ -12,47 +14,50 @@ export default class Publisher extends Component {
       error: null,
       audio: true,
       video: true,
-      videoSource: 'camera'
+      videoSource: "camera"
     };
   }
 
-  setAudio = (audio) => {
+  setAudio = audio => {
     this.setState({ audio });
-  }
+  };
 
-  setVideo = (video) => {
+  setVideo = video => {
     this.setState({ video });
-  }
+  };
 
-  setVideoSource = (videoSource) => {
+  setVideoSource = videoSource => {
     this.setState({ videoSource });
-  }
+  };
 
-  onError = (err) => {
+  onError = err => {
     this.setState({ error: `Failed to publish: ${err.message}` });
-  }
+  };
 
   render() {
+    console.log('pub: ', this.publisher)
     return (
       <div>
         {this.state.error ? <div>{this.state.error}</div> : null}
         <OTPublisher
+          ref={ref => {
+            this.publisher = ref;
+          }}
           properties={{
             publishAudio: this.state.audio,
-            publishVideo: this.state.video,
-            videoSource: this.state.videoSource === 'screen' ? 'screen' : undefined
+            publishVideo: this.state.video
           }}
           onError={this.onError}
         />
         <RadioButtons
           buttons={[
             {
-              label: 'Camera',
-              value: 'camera'
+              label: "Camera",
+              value: "camera"
             },
             {
-              label: 'Screen',
-              value: 'screen'
+              label: "Screen",
+              value: "screen"
             }
           ]}
           initialChecked={this.state.videoSource}
@@ -68,7 +73,19 @@ export default class Publisher extends Component {
           initialChecked={this.state.video}
           onChange={this.setVideo}
         />
+        <Cycle onClick={() => {
+          if (this.publisher) {
+            console.log('cycle!')
+            this.publisher.getPublisher().cycleVideo();
+          }
+        }} />
       </div>
     );
+  }
+}
+
+class Cycle extends Component {
+  render() {
+    return <button onClick={this.props.onClick}>Cycle Video</button>;
   }
 }
